@@ -1,95 +1,126 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>اصنع المفاجأة</title>
-
-<style>
-body{
- margin:0;
- font-family:tahoma;
- text-align:center;
- background:linear-gradient(45deg,#ffb6d9,#ff4fa3);
- overflow:hidden;
-}
-.wrap{position:relative;z-index:5;padding:20px}
-h2{color:white;text-shadow:0 0 10px red}
-
-input,select,button{
- display:block;
- margin:10px auto;
- padding:12px;
- width:85%;
- max-width:330px;
- border-radius:25px;
- border:none;
-}
-
-button{
- background:#800040;
- color:white;
- font-weight:bold;
- box-shadow:0 0 10px red;
-}
-
-.heart{
- position:absolute;
- font-size:22px;
- animation:up 6s linear infinite;
-}
-@keyframes up{
- from{transform:translateY(100vh)}
- to{transform:translateY(-10vh)}
-}
-</style>
+    <meta charset="UTF-8">
+    <title>صانع رسائل الحب 💖</title>
+    <style>
+        body {
+            background-color: #ffc1d1; /* لون بمبي */
+            font-family: 'Cairo', sans-serif;
+            overflow-x: hidden;
+            text-align: center;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 20px;
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 10;
+        }
+        input, select, button {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border: 2px solid #ff4d6d;
+        }
+        button {
+            background: #ff4d6d;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 5px #c9184a; /* زرار بارز */
+            transition: 0.2s;
+        }
+        button:active {
+            box-shadow: 0 2px #c9184a;
+            transform: translateY(3px);
+        }
+        .hearts-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+    </style>
 </head>
-
 <body>
+    <div class="hearts-bg" id="heartsContainer"></div>
 
-<div class="wrap">
-<h2>💘 اصنع رسالة حب نار 💘</h2>
+    <div class="container">
+        <h1>💕 صانع المفاجآت 💕</h1>
+        <input type="text" id="sender" placeholder="اسمك يا قمر">
+        <input type="text" id="receiver" placeholder="اسم العسل اللي هتروحله الرسالة">
+        <select id="type">
+            <option>حب</option>
+            <option>عشق</option>
+            <option>غرام</option>
+            <option>تهنئة</option>
+            <option>فرح</option>
+        </select>
+        <input type="text" id="photo" placeholder="رابط صورتك أو صورته (اختياري)">
+        <input type="text" id="music" placeholder="رابط الأغنية (YouTube/MP3) (اختياري)">
+        <input type="date" id="specialDate">
+        <input type="password" id="pass" placeholder="كلمة السر للرابط">
+        <button onclick="generateLink()">توليد رابط الرسالة ✨</button>
+        
+        <div id="resultArea" style="display:none;">
+            <p>تم صنع الرابط بنجاح!</p>
+            <input type="text" id="finalLink" readonly>
+            <button onclick="copyLink()">نسخ الرابط 📋</button>
+        </div>
+    </div>
 
-<input id="from" placeholder="اسمك">
-<input id="to" placeholder="اسم الحبيب">
-<select id="type">
-<option>حب</option>
-<option>عشق</option>
-<option>غرام</option>
-<option>تهنئة</option>
-<option>رسالة وخلاص</option>
-</select>
+    <script>
+        // توليد القلوب المتطايرة
+        const emojis = ['💋','❤️‍🔥','💟','❣️','💕','💞','💓','💗','💖','💝','💘','❤️','😘','😍','🥰'];
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.style.position = 'fixed';
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.top = '100vh';
+            heart.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+            heart.style.fontSize = Math.random() * 20 + 20 + 'px';
+            heart.style.animation = `floatUp ${Math.random() * 3 + 2}s linear forwards`;
+            document.getElementById('heartsContainer').appendChild(heart);
+            setTimeout(() => heart.remove(), 5000);
+        }
+        setInterval(createHeart, 300);
 
-<input id="img" placeholder="رابط صورة">
-<input id="music" placeholder="رابط موسيقى">
-<input id="date" placeholder="2024-01-01">
-<input id="pass" placeholder="كلمة السر">
+        function generateLink() {
+            const data = {
+                s: document.getElementById('sender').value,
+                r: document.getElementById('receiver').value,
+                t: document.getElementById('type').value,
+                p: document.getElementById('pass').value,
+                img: document.getElementById('photo').value,
+                m: document.getElementById('music').value,
+                d: document.getElementById('specialDate').value
+            };
+            // تحويل البيانات لـ Base64 عشان الرابط يبقى شكله احترافي
+            const encodedData = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+            const url = window.location.href.replace('index.html', '') + 'message.html?msg=' + encodedData;
+            
+            document.getElementById('finalLink').value = url;
+            document.getElementById('resultArea').style.display = 'block';
+        }
 
-<button onclick="make()">توليد الرابط</button>
-<input id="out" readonly>
-<button onclick="copy()">نسخ</button>
-</div>
-
-<script>
-function make(){
- let url=`message.html?from=${encodeURIComponent(from.value)}&to=${encodeURIComponent(to.value)}&type=${encodeURIComponent(type.value)}&img=${encodeURIComponent(img.value)}&music=${encodeURIComponent(music.value)}&date=${encodeURIComponent(date.value)}&pass=${encodeURIComponent(pass.value)}`;
- out.value=url;
-}
-function copy(){
- out.select();
- document.execCommand("copy");
- alert("تم النسخ 💋");
-}
-
-let e=["💋","❤️","💘","💖","💝","💕","😍","🥰"];
-setInterval(()=>{
- let h=document.createElement("div");
- h.className="heart";
- h.style.left=Math.random()*100+"vw";
- h.innerText=e[Math.floor(Math.random()*e.length)];
- document.body.appendChild(h);
- setTimeout(()=>h.remove(),6000);
-},250);
-</script>
-
+        function copyLink() {
+            const copyText = document.getElementById("finalLink");
+            copyText.select();
+            document.execCommand("copy");
+            alert("تم النسخ يا جميل! ابعتها للحبيب 😉");
+        }
+    </script>
+    <style>
+        @keyframes floatUp {
+            to { transform: translateY(-110vh) rotate(360deg); opacity: 0; }
+        }
+    </style>
 </body>
 </html>
