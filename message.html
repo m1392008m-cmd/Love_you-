@@ -6,15 +6,14 @@
     <title>المفاجأة المنتظرة</title>
     <style>
         body { margin: 0; background: #000; overflow: hidden; font-family: 'Tahoma'; }
-        canvas { display: block; position: absolute; top: 0; left: 0; z-index: 1; } /* كانفاس الجزيئات */
-        #fireworks-container { /* كانفاس الألعاب النارية */
+        canvas { display: block; position: absolute; top: 0; left: 0; z-index: 1; }
+        #fireworks-container {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 5; /* فوق الجزيئات */
-            pointer-events: none; /* لتسمح بالضغط على الأزرار تحتها */
+            z-index: 5; pointer-events: none;
         }
         #overlay {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            text-align: center; color: white; z-index: 10; width: 100%;
+            text-align: center; color: white; z-index: 10; width: 90%;
         }
         .btn-magic {
             padding: 20px 40px; background: none; border: 2px solid #ff4d6d;
@@ -23,18 +22,34 @@
         }
         .btn-magic:hover { background: #ff4d6d; color: white; }
         #finalContent { display: none; opacity: 0; transition: 2s; }
-        .love-text { font-size: 28px; font-weight: bold; text-shadow: 0 0 15px #ff4d6d; line-height: 1.6; }
-        .counter { font-size: 16px; margin-top: 20px; color: #ffc1d1; }
+        
+        /* تنسيق العنوان الرئيسي */
+        .love-text { font-size: 26px; font-weight: bold; text-shadow: 0 0 15px #ff4d6d; line-height: 1.4; }
+        
+        /* تنسيق الرسالة الشخصية المضافة */
+        .personal-msg { 
+            font-size: 20px; 
+            color: #ffc1d1; 
+            margin-top: 20px; 
+            font-style: italic; 
+            line-height: 1.6;
+            text-shadow: 0 0 10px rgba(255, 193, 209, 0.5);
+        }
+
+        .counter { font-size: 16px; margin-top: 25px; color: #ffc1d1; opacity: 0.8; }
     </style>
 </head>
 <body>
 
-    <canvas id="particlesCanvas"></canvas> <div id="fireworks-container"></div> <div id="overlay">
+    <canvas id="particlesCanvas"></canvas> 
+    <div id="fireworks-container"></div> 
+    <div id="overlay">
         <div id="startZone">
             <button class="btn-magic" onclick="ignite()">المس لترى المعجزة 🎆</button>
         </div>
         <div id="finalContent">
-            <div class="love-text" id="msgBox"></div>
+            <div class="love-text" id="headerBox"></div>
+            <div class="personal-msg" id="messageBox"></div>
             <div class="counter" id="timerBox"></div>
         </div>
     </div>
@@ -42,9 +57,8 @@
     <script src="https://cdn.jsdelivr.net/npm/fireworks-js@2.x/dist/index.umd.js"></script>
 
     <script>
-        // --------------- إعدادات الجزيئات (Particles) -------------------
         const particlesCanvas = document.getElementById('particlesCanvas');
-        const pCtx = particlesCanvas.getContext('2d'); // تغيير اسم المتغير لتجنب التعارض
+        const pCtx = particlesCanvas.getContext('2d');
         let particles = [];
         let mouse = { x: -100, y: -100 };
         let isHeartMode = false;
@@ -79,14 +93,6 @@
                     this.y += this.vy;
                     if(this.x > particlesCanvas.width || this.x < 0) this.vx *= -1;
                     if(this.y > particlesCanvas.height || this.y < 0) this.vy *= -1;
-                    
-                    let dx = mouse.x - this.x;
-                    let dy = mouse.y - this.y;
-                    let dist = Math.sqrt(dx*dx + dy*dy);
-                    if(dist < 100) {
-                        this.x -= dx/10;
-                        this.y -= dy/10;
-                    }
                 }
             }
         }
@@ -102,67 +108,64 @@
             requestAnimationFrame(animateParticles);
         }
 
-        window.addEventListener('mousemove', e => { mouse.x = e.x; mouse.y = e.y; });
         initParticles(); animateParticles();
 
-        // --------------- إعدادات الألعاب النارية (Fireworks) -------------------
         const container = document.getElementById('fireworks-container');
         const fireworks = new Fireworks.default(container, {
-            autoresize: true,
-            opacity: 0.8,
-            acceleration: 1.05,
-            friction: 0.97,
-            gravity: 1.5,
-            particles: 50,
-            traceSpeed: 5,
-            explosion: 5,
-            boundaries: { x: 50, y: 50, width: container.width, height: container.height },
-            sound: {
-                enabled: true,
-                files: [
-                    'https://fireworks.js.org/sounds/explosion0.mp3',
-                    'https://fireworks.js.org/sounds/explosion1.mp3',
-                    'https://fireworks.js.org/sounds/explosion2.mp3'
-                ],
-                volume: { min: 4, max: 8 }
-            }
+            autoresize: true, opacity: 0.8, acceleration: 1.05, friction: 0.97, gravity: 1.5,
+            particles: 50, traceSpeed: 5, explosion: 5
         });
 
-        // ----------------- ربط البيانات والمنطق --------------------
         const q = new URLSearchParams(location.search);
         let data = JSON.parse(decodeURIComponent(escape(atob(q.get('v')))));
 
         async function ignite() {
             document.getElementById('startZone').style.display = 'none';
-            fireworks.start(); // بدء الألعاب النارية الأولية
-            await new Promise(r => setTimeout(r, 2000)); // انتظار لمدة ثانيتين
-            fireworks.stop(); // إيقاف الألعاب النارية
-
-            isHeartMode = true; // بدء تجمع الجزيئات لتشكيل القلب
+            fireworks.start();
+            await new Promise(r => setTimeout(r, 2000));
+            fireworks.stop();
+            isHeartMode = true;
 
             setTimeout(() => {
                 const final = document.getElementById('finalContent');
                 final.style.display = 'block';
                 setTimeout(() => final.style.opacity = '1', 100);
-                typeMsg();
+                startTypingSequence();
                 if(data.d) countTime();
-            }, 2000); // انتظار ثانيتين أخرى حتى يتشكل القلب وتبدأ الكتابة
+            }, 2000);
         }
 
-        async function typeMsg() {
-            const txt = `إلى ${data.t}..\n${data.y}\nأنتِ العالم بالنسبة لي.\nمن: ${data.f} ❤️`;
-            let i = 0;
-            const target = document.getElementById('msgBox');
-            const timer = setInterval(() => {
-                target.innerHTML += txt[i] === '\n' ? '<br>' : txt[i];
-                i++;
-                if(i >= txt.length) {
-                    clearInterval(timer);
-                    // بعد انتهاء الكتابة، ألعاب نارية احتفالية
-                    fireworks.start();
-                    setTimeout(() => fireworks.stop(), 5000); // توقف بعد 5 ثواني
-                }
-            }, 100);
+        async function startTypingSequence() {
+            const headerPart = `إلى ${data.t}..\n${data.y}`;
+            const messagePart = data.m ? `\n"${data.m}"` : "";
+            const footerPart = `\nمن: ${data.f} ❤️`;
+
+            // كتابة العنوان أولاً
+            await typeEffect('headerBox', headerPart, 80);
+            // كتابة الرسالة الخاصة بعدها
+            await typeEffect('messageBox', messagePart, 50);
+            // كتابة الخاتمة
+            await typeEffect('messageBox', footerPart, 60, true);
+
+            // تشغيل ألعاب نارية ختامية
+            fireworks.start();
+            setTimeout(() => fireworks.stop(), 6000);
+        }
+
+        function typeEffect(elementId, text, speed, append = false) {
+            return new Promise((resolve) => {
+                let i = 0;
+                const target = document.getElementById(elementId);
+                const timer = setInterval(() => {
+                    const char = text[i] === '\n' ? '<br>' : text[i];
+                    target.innerHTML += char;
+                    i++;
+                    if (i >= text.length) {
+                        clearInterval(timer);
+                        resolve();
+                    }
+                }, speed);
+            });
         }
 
         function countTime() {
